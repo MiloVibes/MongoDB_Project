@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To Do List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.0/main.min.css" />
+    <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Task Manager</h2>
+            <ul>
+                <li><a href="#" onclick="showToday()">Today</a></li>
+                <li><a href="#" onclick="showUpcoming()">Upcoming</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <h1 id="main-title">Today</h1>
+            <button onclick="showAddItemForm()">Add a new item</button>
+
+            <div id="add-item-form" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeAddItemForm()">&times;</span>
+                    <h2>Add a new item</h2>
+                    <form action="/add_item" method="post">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required /><br />
+                        <label for="description">Description:</label>
+                        <input type="text" id="description" name="description" required /><br />
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" /><br />
+                        <button type="submit">Add Item</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="tasks" id="today-items">
+                <h2>Today's Items</h2>
+                <ul id="items">
+                    {% for item in items %}
+                        {% if 'date' in item and item.date == current_date %}
+                            <li>
+                                {{ item.name }}: {{ item.description }} ({{ item.date }})
+                                <form action="/delete_item" method="post" style="display: inline">
+                                    <input type="hidden" name="_id" value="{{ item._id }}" />
+                                    <button type="submit">Delete</button>
+                                </form>
+                                <button
+                                    onclick="showUpdateForm('{{ item._id }}', '{{ item.name }}', '{{ item.description }}', '{{ item.date }}')">
+                                    Update
+                                </button>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="tasks" id="upcoming-items" style="display: none;">
+                <h2>Upcoming Items</h2>
+                <ul id="upcoming-list">
+                    {% for item in items %}
+                        {% if 'date' in item and item.date > current_date %}
+                            <li>
+                                ({{ item.date }}): {{ item.name }}: {{ item.description }}
+                                <form action="/delete_item" method="post" style="display: inline">
+                                    <input type="hidden" name="_id" value="{{ item._id }}" />
+                                    <button type="submit">Delete</button>
+                                </form>
+                                <button
+                                    onclick="showUpdateForm('{{ item._id }}', '{{ item.name }}', '{{ item.description }}', '{{ item.date }}')">
+                                    Update
+                                </button>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div id="updateForm" style="display: none;">
+                <h2>Update item</h2>
+                <form action="/update_item" method="post">
+                    <input type="hidden" id="update_id" name="_id" />
+                    <label for="update_name">Name:</label>
+                    <input type="text" id="update_name" name="name" required /><br />
+                    <label for="update_description">Description:</label>
+                    <input type="text" id="update_description" name="description" required /><br />
+                    <label for="update_date">Date:</label>
+                    <input type="date" id="update_date" name="date" /><br />
+                    <button type="submit">Update Item</button>
+                </form>
+            </div>
+
+            <div id="calendar"></div>
+
+            <div id="events-data" style="display: none;">
+                {{ items | tojson }}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.0/main.min.js"></script>
+    <script src="static/script.js"></script>
+</body>
+</html>
